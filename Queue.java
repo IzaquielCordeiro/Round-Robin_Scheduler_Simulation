@@ -1,6 +1,3 @@
-import java.util.ArrayList;
-import java.util.List;
-
 public class Queue<Flow>
 {
     private int head = 0;
@@ -30,7 +27,8 @@ public class Queue<Flow>
     public Flow next()
     {
         this.tail = this.head;
-        this.head = (this.head+1)%(flows.length-1);
+        this.head = (this.head+1)%flows.length;
         return get(head);
     }
+
 }
