@@ -1,34 +1,84 @@
-public class Queue<Flow>
+public class Queue
 {
-    private int head = 0;
-    private int tail = -1;
-    private Flow[] flows;
+    private Node head;
+    private Node tail;
 
-    public Queue(int lenght){
-        this.flows = (Flow[]) new Object[lenght];
-    }
-
-    public Flow add(Flow f)
+    public Node add(Flow f)
     {
-        this.flows[++tail] = f;
-        return get(tail);
+        Node node = new Node(f);
+        if(isEmpty())
+        {
+            this.head = node;
+            this.tail = this.head;
+            node.setNext(this.head);
+            node.setPrev(this.tail);
+        }
+        else
+        {
+            node.setNext(this.head);
+            node.setPrev(this.tail);
+            this.tail.setNext(node);
+            this.head.setPrev(node);
+            this.tail = node;
+        }
+
+        return node;
     }
 
-    public Flow get(int i)
+    public Node remove()
     {
-        return this.flows[i];
+        Node node = null;
+        if(this.isEmpty() || this.head.equals(this.tail))
+        {
+            this.head = node;
+            this.tail = node;
+        }
+        else
+        {
+            node = this.head;
+            node.getPrev().setNext(node.getNext());
+            node.getNext().setPrev(node.getPrev());
+            this.tail = node.getPrev();
+            this.head = node.getNext();
+        }
+
+        return node;
     }
 
-    public Flow getHead()
+    public Node pass()
     {
-        return this.flows[head];
+        if(this.head.getNext() != null)
+        {
+            this.tail = head;
+            this.head = this.head.getNext();
+            return this.head;
+        }
+        return this.head;
     }
 
-    public Flow next()
+    public Node getHead()
     {
-        this.tail = this.head;
-        this.head = (this.head+1)%flows.length;
-        return get(head);
+        return this.head;
     }
 
+    public boolean isEmpty(){ return this.head == null && this.tail == null;}
+}
+
+class Node
+{
+    private Node prev;
+    private Flow flow;
+    private Node next;
+
+    public Node(Flow flow){this.flow = flow;}
+
+    public void setPrev(Node prev){ this.prev = prev; }
+
+    public void setNext(Node next){ this.next = next; }
+
+    public Node getNext(){ return this.next; }
+
+    public Node getPrev(){ return this.prev; }
+
+    public Flow getFlow() { return this.flow; }
 }

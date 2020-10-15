@@ -1,0 +1,1 @@
+public enum States {RUNNING, BLOCKED, READY, CREATED, FINISHED};
