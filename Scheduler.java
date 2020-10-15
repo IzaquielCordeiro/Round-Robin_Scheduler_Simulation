@@ -1,34 +1,48 @@
-public class Scheduler
+import java.util.concurrent.Semaphore;
+
+public class Scheduler implements Runnable
 {
-    static int N_PROCESS = 4;
-    static int[] PROCESSES_TIME = {3000, 9000, 4500, 6000};
-    static int N_THREADS= 0;
-    static int EXECUTION_TIME = 2100;
-    static int PROCESS_TIME = 2000;
-    static int THREAD_TIME = 10000;
-    static Queue<Flow> FLOWS = new Queue(N_PROCESS+N_THREADS);
+    private final Queue PROC = new Queue();
+    private Thread me;
+    public final Semaphore CPU = new Semaphore(1);
 
-    static Flow ExecutingFlow;
+    public Scheduler(){ this.me = new Thread(this, "SCHEDULER");}
 
-    public static void main(String[] args)
+    @Override
+    public void run()
     {
-        for (int i=1; i<=N_PROCESS; i++){FLOWS.add(new Process(i, PROCESSES_TIME[i-1]));}
-        //for (int i=0; i<=(N_THREADS); i++){FLOWS.set(i, new Thread(1, 1000));}
-
-        while(true)
+        while(!this.PROC.isEmpty())
         {
-            if(!FLOWS.getHead().getState().equals(Flow.States.FINISHED))
+            Flow flow = this.PROC.getHead().getFlow();
+
+            if (flow.state == States.FINISHED) PROC.remove();
+            else
             {
-                long sys_start_time = System.currentTimeMillis();
-                long next_time_slice_interrupt = sys_start_time + EXECUTION_TIME;
-
-                ExecutingFlow = FLOWS.getHead();
-                ExecutingFlow.setReady();
-                ExecutingFlow.run(next_time_slice_interrupt);
+                flow.state = States.RUNNING;
+                flow.run();
+                PROC.pass();
             }
-            FLOWS.next();
         }
-
     }
 
+    public void add(Flow f)
+    {
+        if(this.PROC.isEmpty())
+        {
+            this.PROC.add(f);
+            f.state = States.READY;
+            me.start();
+        }
+        else
+        {
+            this.PROC.add(f);
+            f.state = States.READY;
+        }
+    }
+
+
+    public void interrupt()
+    {
+        me.interrupt();
+    }
 }
